@@ -20,18 +20,6 @@ export const COLORS = {
   [INFECT]: '#AFA9EC'
 };
 
-// ================= Costs =================
-export const COSTS = {
-  block: 5,
-  blinker: 4,
-  glider: 8,
-  lwss: 18,
-  immortal: 15,
-  breeder: 10,
-  attack: 3,
-  areaAttack: 8
-};
-
 // ================= Pattern definitions =================
 // 基本形 (row, col 相対座標) + 配置時のセル種別
 export const BASE_PATTERNS = {
@@ -43,8 +31,4 @@ export const BASE_PATTERNS = {
   breeder:  { cells: [[0,0]], type: BREEDER }
 };
 
-// ================= Game balance =================
-export const INITIAL_MONEY = 40;
-export const INITIAL_MAINT_COST = 5;
-export const STEPS_PER_TURN = 4;
 export const STORAGE_KEY = 'lgr_best_score_v4';

@@ -1,6 +1,7 @@
 import {
   ROWS, COLS, EMPTY, NORMAL, IMMORTAL, BREEDER, HAZARD, INFECT
 } from './constants.js';
+import { config } from './config.js';
 import { makeGrid } from './grid.js';
 
 /**
@@ -52,7 +53,7 @@ export function evolve(grid) {
       }
 
       if (cur === INFECT) {
-        next[r][c] = (alive >= 1 || Math.random() < 0.5) ? INFECT : EMPTY;
+        next[r][c] = (alive >= 1 || Math.random() < config.infectSurviveNoNeighbor) ? INFECT : EMPTY;
       } else if (cur === BREEDER) {
         next[r][c] = (alive >= 2 && alive <= 4) ? BREEDER : EMPTY;
       } else if (cur === NORMAL) {
@@ -61,7 +62,7 @@ export function evolve(grid) {
         // EMPTY
         if (alive === 3) {
           next[r][c] = NORMAL;
-        } else if (alive === 2 && breederNear >= 1 && Math.random() < 0.5) {
+        } else if (alive === 2 && breederNear >= 1 && Math.random() < config.breederBoostChance) {
           next[r][c] = NORMAL;
         } else {
           next[r][c] = EMPTY;
@@ -74,7 +75,7 @@ export function evolve(grid) {
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       if (grid[r][c] !== INFECT) continue;
-      if (Math.random() >= 0.25) continue;
+      if (Math.random() >= config.infectSpreadChance) continue;
       const dr = [-1, 0, 1][Math.floor(Math.random() * 3)];
       const dc = [-1, 0, 1][Math.floor(Math.random() * 3)];
       if (dr === 0 && dc === 0) continue;

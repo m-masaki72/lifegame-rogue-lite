@@ -1,8 +1,8 @@
 import {
   ROWS, COLS, EMPTY, NORMAL, IMMORTAL, BREEDER, HAZARD, INFECT,
-  COSTS, BASE_PATTERNS, COLORS,
-  INITIAL_MONEY, INITIAL_MAINT_COST, STEPS_PER_TURN
+  BASE_PATTERNS, COLORS
 } from './constants.js';
+import { config } from './config.js';
 import { makeGrid, countAlive, getPatternCells, canPlacePattern } from './grid.js';
 import { evolve, placeHazards, placeInfect } from './evolution.js';
 import { CanvasRenderer } from './renderer.js';
@@ -14,8 +14,8 @@ import { loadBestScore, saveBestScore } from './storage.js';
 const state = {
   grid: makeGrid(EMPTY),
   turn: 0,
-  money: INITIAL_MONEY,
-  maintCost: INITIAL_MAINT_COST,
+  money: config.initialMoney,
+  maintCost: config.initialMaintCost,
   currentTool: 'block',
   currentMode: 'place',  // 'place' | 'attack'
   rotation: 0,
@@ -25,7 +25,7 @@ const state = {
   isPaused: false,
   stepsRemaining: 0,
   currentStepStart: 0,
-  stepSpeed: 240,
+  stepSpeed: config.stepSpeed,
   bestScore: 0,
   modifiers: {
     nextRewardMultiplier: 1,
@@ -98,8 +98,8 @@ function selectMode(mode) {
 function init() {
   state.grid = makeGrid(EMPTY);
   state.turn = 0;
-  state.money = INITIAL_MONEY;
-  state.maintCost = INITIAL_MAINT_COST;
+  state.money = config.initialMoney;
+  state.maintCost = config.initialMaintCost;
   state.currentTool = 'block';
   state.currentMode = 'place';
   state.rotation = 0;
@@ -137,7 +137,7 @@ function startTurn() {
   ensureAudio();
   state.isAnimating = true;
   state.isPaused = false;
-  state.stepsRemaining = STEPS_PER_TURN + state.modifiers.extraStepsNext;
+  state.stepsRemaining = config.stepsPerTurn + state.modifiers.extraStepsNext;
   state.currentStepStart = performance.now();
   dom.btnStep.disabled = true;
   dom.btnStep.textContent = '進化中...';
@@ -157,7 +157,7 @@ function performEvolveStep() {
 
 async function finishTurn() {
   const alive = countAlive(state.grid, [NORMAL, IMMORTAL, BREEDER]);
-  const reward = Math.round(alive * 1 * state.modifiers.nextRewardMultiplier);
+  const reward = Math.round(alive * config.rewardPerCell * state.modifiers.nextRewardMultiplier);
   state.money += reward;
   const costPaid = Math.max(0, state.maintCost - state.modifiers.nextCostReduction);
   state.money -= costPaid;
@@ -167,19 +167,19 @@ async function finishTurn() {
   // 邪魔要素の追加
   const now = performance.now();
   let costIncreased = false;
-  if (state.turn % 5 === 0) {
-    const hz = placeHazards(state.grid, 2 + Math.floor(state.turn / 5));
+  if (state.turn % 5 === 0 && config.hazardOnFiveTurn) {
+    const hz = placeHazards(state.grid, config.hazardFiveBase + Math.floor(state.turn / 5));
     for (const [r, c] of hz) renderer.markBirth(r, c, now);
-    if (state.turn >= 10) {
-      const inf = placeInfect(state.grid, 1 + Math.floor((state.turn - 10) / 10));
+    if (state.turn >= config.infectStartTurn) {
+      const inf = placeInfect(state.grid, config.infectFiveBase + Math.floor((state.turn - config.infectStartTurn) / 10));
       for (const [r, c] of inf) renderer.markBirth(r, c, now);
     }
-  } else if (state.turn % 2 === 0) {
-    const hz = placeHazards(state.grid, 1);
+  } else if (state.turn % 2 === 0 && config.hazardOnEvenTurn > 0) {
+    const hz = placeHazards(state.grid, config.hazardOnEvenTurn);
     for (const [r, c] of hz) renderer.markBirth(r, c, now);
   }
-  if (state.turn % 3 === 0) {
-    state.maintCost += 3;
+  if (state.turn % config.maintCostInterval === 0 && config.maintCostIncrement > 0) {
+    state.maintCost += config.maintCostIncrement;
     costIncreased = true;
   }
 
@@ -216,7 +216,7 @@ async function finishTurn() {
   dom.btnPause.textContent = '⏸ 一時停止';
 
   // 5ターンごとにショップ
-  if (state.turn % 5 === 0 && state.turn > 0) {
+  if (state.turn % config.shopInterval === 0 && state.turn > 0) {
     setTimeout(openShop, 400);
   } else {
     dom.btnStep.disabled = false;
@@ -265,7 +265,7 @@ function tryPlacePattern(r, c) {
   if (state.gameOver) return;
   const pat = getPatternCells(state.currentTool, state.rotation, state.flipped);
   if (!pat) return;
-  const cost = COSTS[state.currentTool];
+  const cost = config.costs[state.currentTool];
   if (state.money < cost) {
     setMsg(`お金が足りませんわ（${cost}💰必要）`, 'error');
     sfx.reject();
@@ -290,7 +290,7 @@ function tryPlacePattern(r, c) {
 
 function tryAttack(r, c, area) {
   if (state.gameOver) return;
-  const cost = area ? COSTS.areaAttack : COSTS.attack;
+  const cost = area ? config.costs.areaAttack : config.costs.attack;
   if (state.money < cost) {
     setMsg(`お金が足りませんわ（${cost}💰必要）`, 'error');
     sfx.reject();
@@ -339,7 +339,7 @@ function loop(now) {
   if (state.currentMode === 'place') {
     const pat = getPatternCells(state.currentTool, state.rotation, state.flipped);
     if (pat && renderer.hover.row >= 0) {
-      const canPlace = state.money >= COSTS[state.currentTool]
+      const canPlace = state.money >= config.costs[state.currentTool]
         && canPlacePattern(state.grid, renderer.hover.row, renderer.hover.col, pat.cells);
       renderer.setHover(renderer.hover.row, renderer.hover.col, 'place', pat.cells, canPlace);
     }
