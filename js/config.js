@@ -18,16 +18,16 @@ export const DEFAULTS = {
   rewardPerCell: 1,
   maintCostIncrement: 3,
   maintCostInterval: 3,
-  chainThresholds: [10, 20, 30],
-  chainMultipliers: [1.5, 2.0, 3.0],
+  chainThresholds: [20],
+  chainMultipliers: [1.5],
   densityBonusEnabled: false,
   densityTable: [[10, 1.5], [20, 2.0], [50, 3.0]],
 
   // --- Threat ---
-  hazardOnEvenTurn: 1,
-  hazardOnFiveTurn: true,
+  hazardOnEvenTurn: 0,
+  hazardOnFiveTurn: false,
   hazardFiveBase: 2,
-  infectStartTurn: 10,
+  infectStartTurn: 15,
   infectFiveBase: 1,
   safeZoneEnabled: false,
   safeZoneShrinkPerTurn: 0,
@@ -38,8 +38,8 @@ export const DEFAULTS = {
   shopOfferCount: 3,
 
   // --- Board ---
-  cols: 40,
-  rows: 30,
+  cols: 16,
+  rows: 12,
   animDurationMs: 180,
 
   // --- Costs ---

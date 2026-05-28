@@ -1,4 +1,4 @@
-import { EMPTY, HAZARD, INFECT, NORMAL, BASE_PATTERNS } from './constants.js';
+import { EMPTY, HAZARD, INFECT, NORMAL, BASE_PATTERNS, UNLOCK_ITEMS } from './constants.js';
 import { config } from './config.js';
 import { getRng } from './prng.js';
 
@@ -6,16 +6,16 @@ export const SHOP_POOL = [
   {
     id: 'cash_small',
     name: '💰 小袋',
-    desc: '即座に +25💰',
+    desc: '即座に +30💰',
     cost: 0,
-    apply: ({ state }) => { state.money += 25; }
+    apply: ({ state }) => { state.money += 30; }
   },
   {
     id: 'cash_big',
     name: '💰 大袋',
-    desc: '即座に +60💰',
+    desc: '即座に +70💰',
     cost: 30,
-    apply: ({ state }) => { state.money += 60; }
+    apply: ({ state }) => { state.money += 70; }
   },
   {
     id: 'cost_cut',
@@ -28,7 +28,7 @@ export const SHOP_POOL = [
     id: 'cost_reset',
     name: '🔄 維持リセット',
     desc: '維持コストを初期値に戻す',
-    cost: 45,
+    cost: 40,
     apply: ({ state }) => { state.maintCost = config.initialMaintCost; }
   },
   {
@@ -51,10 +51,8 @@ export const SHOP_POOL = [
     desc: '盤面の死亡ゾーン除去',
     cost: 18,
     apply: ({ state, renderer, now }) => {
-      const rows = config.rows;
-      const cols = config.cols;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < config.rows; r++) {
+        for (let c = 0; c < config.cols; c++) {
           if (state.grid[r][c] === HAZARD) {
             renderer.markDeath(r, c, HAZARD, now);
             state.grid[r][c] = EMPTY;
@@ -69,10 +67,8 @@ export const SHOP_POOL = [
     desc: '盤面の侵食セル除去',
     cost: 22,
     apply: ({ state, renderer, now }) => {
-      const rows = config.rows;
-      const cols = config.cols;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < config.rows; r++) {
+        for (let c = 0; c < config.cols; c++) {
           if (state.grid[r][c] === INFECT) {
             renderer.markDeath(r, c, INFECT, now);
             state.grid[r][c] = EMPTY;
@@ -81,41 +77,53 @@ export const SHOP_POOL = [
       }
     }
   },
-  {
-    id: 'free_glider',
-    name: '✈️ グライダー無料配置',
-    desc: '中央にグライダー配置',
-    cost: 5,
-    apply: ({ state, renderer, now }) => {
-      const cr = Math.floor(config.rows / 2);
-      const cc = Math.floor(config.cols / 2);
-      const wall = config.boundaryMode === 'wall';
-      for (const [dy, dx] of BASE_PATTERNS.glider.cells) {
-        let r, c;
-        if (wall) {
-          r = cr + dy;
-          c = cc + dx;
-          if (r < 0 || r >= config.rows || c < 0 || c >= config.cols) continue;
-        } else {
-          r = (cr + dy + config.rows) % config.rows;
-          c = (cc + dx + config.cols) % config.cols;
-        }
-        if (state.grid[r][c] === EMPTY) {
-          state.grid[r][c] = NORMAL;
-          renderer.markBirth(r, c, now);
-        }
-      }
-    }
-  }
 ];
 
-export function pickShopItems(n = 3) {
-  const pool = [...SHOP_POOL];
-  const items = [];
-  for (let i = 0; i < n && pool.length > 0; i++) {
-    const idx = Math.floor(getRng()() * pool.length);
-    items.push(pool[idx]);
-    pool.splice(idx, 1);
+/**
+ * 解放アイテムを state に基づき動的生成して返す
+ * @param {object} state
+ * @returns {Array}
+ */
+function buildUnlockPool(state) {
+  return UNLOCK_ITEMS
+    .filter(item => {
+      if (state.turn < item.minTurn) return false;
+      if (item.pattern === 'areaAttack') return !state.unlockedAttacks.area;
+      return !state.unlockedPatterns.has(item.pattern);
+    })
+    .map(item => ({
+      ...item,
+      apply: ({ state, refreshToolUI }) => {
+        if (item.pattern === 'areaAttack') {
+          state.unlockedAttacks.area = true;
+        } else {
+          state.unlockedPatterns.add(item.pattern);
+        }
+        if (refreshToolUI) refreshToolUI();
+      }
+    }));
+}
+
+export function pickShopItems(n = 3, state = null) {
+  const unlockPool = state ? buildUnlockPool(state) : [];
+  const basePool = [...SHOP_POOL];
+
+  // 解放アイテムを優先的に先頭に入れる（最大2枠）
+  const unlockItems = [];
+  while (unlockItems.length < 2 && unlockPool.length > 0) {
+    const idx = Math.floor(getRng()() * unlockPool.length);
+    unlockItems.push(unlockPool[idx]);
+    unlockPool.splice(idx, 1);
   }
-  return items;
+
+  // 残り枠を通常アイテムで埋める
+  const remaining = n - unlockItems.length;
+  const baseItems = [];
+  for (let i = 0; i < remaining && basePool.length > 0; i++) {
+    const idx = Math.floor(getRng()() * basePool.length);
+    baseItems.push(basePool[idx]);
+    basePool.splice(idx, 1);
+  }
+
+  return [...unlockItems, ...baseItems];
 }

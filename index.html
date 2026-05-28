@@ -3,7 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Life Game Roguelike</title>
+  <title>Life Game Roguelike — 育てる。崩れる。また育てる。</title>
+
+  <!-- OGP / SNS シェア -->
+  <meta name="description" content="ライフゲーム × ローグライク。序盤の生存から終盤の大量破壊サバイバーへ。ブラウザで無料プレイ。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Life Game Roguelike">
+  <meta property="og:title" content="Life Game Roguelike — 育てる。崩れる。また育てる。">
+  <meta property="og:description" content="ライフゲーム × ローグライク。序盤の生存から終盤の大量破壊サバイバーへ。ブラウザで無料プレイ。">
+  <meta property="og:url" content="https://m-masaki72.github.io/lifegame-rogue-lite/">
+  <meta property="og:image" content="https://m-masaki72.github.io/lifegame-rogue-lite/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Life Game Roguelike">
+  <meta name="twitter:description" content="ライフゲーム × ローグライク。序盤の生存から終盤の大量破壊サバイバーへ。ブラウザ無料。">
+  <meta name="twitter:image" content="https://m-masaki72.github.io/lifegame-rogue-lite/og-image.svg">
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -26,6 +45,22 @@
       <div id="lg-message" class="message">パターンを選んで配置 → ▶でリアルタイム進化開始。進化中も配置・撃破できますわ</div>
 
       <div id="spike-text" class="spike-text" style="display:none;"></div>
+
+      <!-- ゲームオーバー シェアパネル -->
+      <div id="share-panel" class="share-panel" style="display:none;">
+        <div class="share-score" id="share-score-text"></div>
+        <div class="share-btns">
+          <a id="share-x" class="share-btn share-btn-x" href="#" target="_blank" rel="noopener">
+            𝕏 でシェア
+          </a>
+          <a id="share-line" class="share-btn share-btn-line" href="#" target="_blank" rel="noopener">
+            LINE でシェア
+          </a>
+          <button id="share-copy" class="share-btn share-btn-copy">
+            🔗 URL コピー
+          </button>
+        </div>
+      </div>
 
       <div id="shop-modal" class="shop-modal" style="display:none;">
         <div class="shop-inner">
@@ -50,16 +85,16 @@
     <div id="pattern-row" class="tool-grid">
       <button class="tool-btn active" data-tool="block"><div class="tool-name">[1] 🟦 ブロック</div><div class="tool-desc">5💰 / 静物</div></button>
       <button class="tool-btn" data-tool="blinker"><div class="tool-name">[2] 💫 ブリンカー</div><div class="tool-desc">4💰 / 振動</div></button>
-      <button class="tool-btn" data-tool="glider"><div class="tool-name">[3] ✈️ グライダー</div><div class="tool-desc">8💰 / 斜進</div></button>
-      <button class="tool-btn" data-tool="lwss"><div class="tool-name">[4] 🚀 LWSS</div><div class="tool-desc">18💰 / 横進</div></button>
-      <button class="tool-btn" data-tool="immortal"><div class="tool-name">[5] 🟢 不死</div><div class="tool-desc">15💰 / 壁</div></button>
-      <button class="tool-btn" data-tool="breeder"><div class="tool-name">[6] 🔵 繁殖</div><div class="tool-desc">10💰 / 増殖</div></button>
+      <button class="tool-btn locked" data-tool="glider" disabled><div class="tool-name">[3] 🔒 グライダー</div><div class="tool-desc">商人で解放</div></button>
+      <button class="tool-btn locked" data-tool="lwss" disabled><div class="tool-name">[4] 🔒 LWSS</div><div class="tool-desc">商人で解放</div></button>
+      <button class="tool-btn locked" data-tool="immortal" disabled><div class="tool-name">[5] 🔒 不死</div><div class="tool-desc">商人で解放</div></button>
+      <button class="tool-btn locked" data-tool="breeder" disabled><div class="tool-name">[6] 🔒 繁殖</div><div class="tool-desc">商人で解放</div></button>
     </div>
 
     <!-- 撃破情報 -->
     <div id="attack-row" class="attack-info" style="display:none;">
-      <div class="attack-card"><div class="attack-name">⚔️ 通常撃破: 3💰</div><div class="attack-desc">死亡ゾーン・侵食セル・自セル除去</div></div>
-      <div class="attack-card"><div class="attack-name">💥 範囲撃破: 8💰</div><div class="attack-desc">右クリック/Shift+クリック: 3×3を一掃</div></div>
+      <div class="attack-card"><div class="attack-name">⚔️ 通常撃破: 3💰</div><div class="attack-desc">左クリックでセルを除去</div></div>
+      <div class="attack-card locked" id="attack-area-card"><div class="attack-name">🔒 範囲撃破（未解放）</div><div class="attack-desc">右クリック/Shift+クリック: 3×3を一掃</div></div>
     </div>
 
     <!-- 回転・反転 -->
