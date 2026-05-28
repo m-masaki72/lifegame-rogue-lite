@@ -274,8 +274,33 @@
 
 ---
 
+## Section 10: 作業ログ
+
+### 2026-05-28 — パフォーマンス改善 + テスト強化 + ドキュメント整備
+
+**パフォーマンス改善（5箇所）**
+- `grid.js` `countAlive`: `Array.includes` → `new Set` で O(n) → O(1) ルックアップ
+- `grid.js` `findClusters`: `queue.shift()` → 事前確保 `Int32Array` + head/tail インデックスで O(n²) → O(n)
+- `evolution.js` `evolve`: ステップごとの `makeGrid` → モジュール変数 `_flatBuf`（Uint8Array）の再利用
+- `main.js` ホバー処理: `getPatternCells` を毎フレーム呼び出し → `_patCache` で tool/rot/flip 変更時のみ再計算
+- `debug.js` `updateLive`: 毎フレームの `countAlive` スキャン削除 → `_lastAlive` をターン終了時に 1 回更新
+
+**テスト強化（102テスト）**
+- `tests/evolution.test.js`: 7 → 29 テスト（過密死・2×2安定・births/deaths配列・HAZARD/IMMORTAL不変・INFECT・BREEDER・境界モード・placeHazards/placeInfect）
+- `tests/grid.test.js`: 9 → 31 テスト（rot=2対称・flip非対称・正規化・countAlive・canPlacePattern境界・getPatternCells・findClusters全パターン）
+- `tests/config.test.js`: 14 → 30 テスト（DEFAULTS全フィールド・hardcoreコスト・sandbox全0・applyConfig複数適用・PRNG均一分布）
+- `tests/hazard.test.js`: 新規 12 テスト（getDangerPerimeter・applyEdgeErosion・getWavePreviewCells）
+
+**ドキュメント**
+- `README.md`: リポジトリ説明・現在状況に特化、進捗・設計は PROGRESS.md に分離
+- `CLAUDE.md`: モジュール責務・State・ゲームループ・config設計・実装状況を最新化
+- `.gitignore`: `.claude/` 追加（Claude Code ローカル設定を誤コミット防止）
+
+---
+
 ## 関連ドキュメント
 
-- `README.md` — ゲーム概要、操作、ルール、プリセット、開発者向け
+- `README.md` — リポジトリ概要・操作・起動・開発者向けコマンド
 - `CLAUDE.md` — Claude Code 向けアーキテクチャ・実装状況・コマンド
+- `PROGRESS.md` — 設計原則・マイルストーン・作業ログ（本ファイル）
 - `LICENSE` — All Rights Reserved 表記
