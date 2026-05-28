@@ -1,11 +1,7 @@
-import { ROWS, COLS, EMPTY, HAZARD, INFECT, NORMAL, BASE_PATTERNS } from './constants.js';
+import { EMPTY, HAZARD, INFECT, NORMAL, BASE_PATTERNS } from './constants.js';
+import { config } from './config.js';
+import { getRng } from './prng.js';
 
-/**
- * ショップアイテムプール定義。
- * 各アイテムは { id, name, desc, cost, apply(ctx) } を持つ。
- * apply には ctx = { state, renderer, now } が渡される。
- * state は { money, maintCost, grid, modifiers } のような変更可能なオブジェクト。
- */
 export const SHOP_POOL = [
   {
     id: 'cash_small',
@@ -31,9 +27,9 @@ export const SHOP_POOL = [
   {
     id: 'cost_reset',
     name: '🔄 維持リセット',
-    desc: '維持コストを5に戻す',
+    desc: '維持コストを初期値に戻す',
     cost: 45,
-    apply: ({ state }) => { state.maintCost = 5; }
+    apply: ({ state }) => { state.maintCost = config.initialMaintCost; }
   },
   {
     id: 'extra_step',
@@ -55,8 +51,10 @@ export const SHOP_POOL = [
     desc: '盤面の死亡ゾーン除去',
     cost: 18,
     apply: ({ state, renderer, now }) => {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
+      const rows = config.rows;
+      const cols = config.cols;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
           if (state.grid[r][c] === HAZARD) {
             renderer.markDeath(r, c, HAZARD, now);
             state.grid[r][c] = EMPTY;
@@ -71,8 +69,10 @@ export const SHOP_POOL = [
     desc: '盤面の侵食セル除去',
     cost: 22,
     apply: ({ state, renderer, now }) => {
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
+      const rows = config.rows;
+      const cols = config.cols;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
           if (state.grid[r][c] === INFECT) {
             renderer.markDeath(r, c, INFECT, now);
             state.grid[r][c] = EMPTY;
@@ -87,11 +87,19 @@ export const SHOP_POOL = [
     desc: '中央にグライダー配置',
     cost: 5,
     apply: ({ state, renderer, now }) => {
-      const cr = Math.floor(ROWS / 2);
-      const cc = Math.floor(COLS / 2);
+      const cr = Math.floor(config.rows / 2);
+      const cc = Math.floor(config.cols / 2);
+      const wall = config.boundaryMode === 'wall';
       for (const [dy, dx] of BASE_PATTERNS.glider.cells) {
-        const r = (cr + dy) % ROWS;
-        const c = (cc + dx) % COLS;
+        let r, c;
+        if (wall) {
+          r = cr + dy;
+          c = cc + dx;
+          if (r < 0 || r >= config.rows || c < 0 || c >= config.cols) continue;
+        } else {
+          r = (cr + dy + config.rows) % config.rows;
+          c = (cc + dx + config.cols) % config.cols;
+        }
         if (state.grid[r][c] === EMPTY) {
           state.grid[r][c] = NORMAL;
           renderer.markBirth(r, c, now);
@@ -101,12 +109,11 @@ export const SHOP_POOL = [
   }
 ];
 
-/** プールから重複なくランダムにn個取り出す */
 export function pickShopItems(n = 3) {
   const pool = [...SHOP_POOL];
   const items = [];
   for (let i = 0; i < n && pool.length > 0; i++) {
-    const idx = Math.floor(Math.random() * pool.length);
+    const idx = Math.floor(getRng()() * pool.length);
     items.push(pool[idx]);
     pool.splice(idx, 1);
   }

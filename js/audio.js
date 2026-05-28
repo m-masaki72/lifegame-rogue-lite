@@ -68,5 +68,11 @@ export const sfx = {
     [784, 988, 1318].forEach((f, i) => {
       setTimeout(() => playTone(f, 0.15, 'sine', 0.1), i * 100);
     });
+  },
+  grandChain: () => {
+    [523, 659, 784, 1047].forEach((f, i) => {
+      setTimeout(() => playTone(f, 0.20, 'sine', 0.12), i * 60);
+    });
+    setTimeout(() => playTone(1568, 0.40, 'triangle', 0.15), 240);
   }
 };

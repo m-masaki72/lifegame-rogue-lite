@@ -293,3 +293,158 @@ body {
 .help-content { margin-top: 8px; line-height: 1.7; }
 .help-content ul { margin: 4px 0; padding-left: 20px; }
 .help-content strong { color: var(--text-primary); }
+
+/* ================= Tutorial overlay ================= */
+#tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+#tutorial-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  max-width: 520px;
+  width: 90%;
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+#tutorial-modal h2 {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+  color: #fff;
+}
+#tutorial-modal p { margin: 8px 0; }
+#tutorial-modal ul { margin: 8px 0; padding-left: 20px; }
+#tutorial-modal strong { color: var(--text-success); }
+.tut-grid {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px 10px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.tut-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.tut-ops { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.tut-op-row { display: flex; align-items: center; gap: 10px; }
+.tut-op-row kbd {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 12px;
+  min-width: 60px;
+  text-align: center;
+  flex-shrink: 0;
+}
+#tutorial-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+#tutorial-dots { display: flex; gap: 6px; }
+.tut-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border-primary);
+}
+.tut-dot.active { background: var(--text-success); }
+#tutorial-btns { display: flex; gap: 8px; }
+
+/* ================= Grand Chain spike ================= */
+.screen-shake {
+  animation: shake 0.4s ease-in-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+.spike-text {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.2rem;
+  font-weight: bold;
+  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+}
+.spike-anim {
+  animation: spikeAppear 1.5s ease-out forwards;
+}
+@keyframes spikeAppear {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(0.9); }
+}
+
+/* ================= Debug panel ================= */
+#debug-panel {
+  font-family: monospace;
+  font-size: 12px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #444;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  color: #ccc;
+  margin-top: 10px;
+  line-height: 1.8;
+}
+#debug-panel h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+.debug-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px 16px;
+}
+.debug-row { display: contents; }
+.debug-key  { color: #888; }
+.debug-val  { color: #5DCAA5; font-weight: bold; }
+#debug-history {
+  margin-top: 8px;
+  border-top: 1px solid #333;
+  padding-top: 6px;
+}
+#debug-history table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+#debug-history th {
+  color: #888;
+  text-align: right;
+  padding: 1px 6px;
+  border-bottom: 1px solid #333;
+}
+#debug-history th:first-child { text-align: left; }
+#debug-history td {
+  text-align: right;
+  padding: 1px 6px;
+  color: #ccc;
+}
+#debug-history td:first-child { text-align: left; color: #888; }
+#debug-history tr:last-child td { color: #fff; }

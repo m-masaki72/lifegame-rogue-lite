@@ -16,6 +16,7 @@
       <div class="stat-card"><div class="stat-label">💰 お金</div><div id="stat-money" class="stat-value">40</div></div>
       <div class="stat-card"><div class="stat-label">維持コスト</div><div id="stat-cost" class="stat-value">5</div></div>
       <div class="stat-card"><div class="stat-label">生存セル</div><div id="stat-alive" class="stat-value">0</div></div>
+      <div class="stat-card" id="stat-chain-card" style="display:none"><div class="stat-label">⚡ チェイン</div><div id="stat-chain" class="stat-value">×1.0</div></div>
       <div class="stat-card"><div class="stat-label">🏆 ベスト</div><div id="stat-best" class="stat-value">-</div></div>
     </div>
 
@@ -23,6 +24,8 @@
     <div class="canvas-wrap">
       <canvas id="lg-canvas" width="600" height="450"></canvas>
       <div id="lg-message" class="message">パターンを選んで配置 → ▶でリアルタイム進化開始。進化中も配置・撃破できますわ</div>
+
+      <div id="spike-text" class="spike-text" style="display:none;"></div>
 
       <div id="shop-modal" class="shop-modal" style="display:none;">
         <div class="shop-inner">

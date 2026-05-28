@@ -6,10 +6,6 @@ export const BREEDER = 3;
 export const INFECT = 7;
 export const HAZARD = 9;
 
-// ================= Grid =================
-export const COLS = 40;
-export const ROWS = 30;
-
 // ================= Colors =================
 export const COLORS = {
   [EMPTY]: null,
