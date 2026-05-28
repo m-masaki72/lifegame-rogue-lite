@@ -23,6 +23,11 @@ export function setSoundEnabled(enabled) {
   if (enabled) ensureAudio();
 }
 
+function vibe(pattern) {
+  if (!soundEnabled) return;
+  try { navigator.vibrate?.(pattern); } catch {}
+}
+
 /** 単音再生（基本ユーティリティ） */
 function playTone(freq, duration, type = 'sine', volume = 0.1) {
   if (!soundEnabled || !audioCtx) return;
@@ -40,39 +45,45 @@ function playTone(freq, duration, type = 'sine', volume = 0.1) {
 
 /** SFXディクショナリ */
 export const sfx = {
-  place:    () => playTone(660, 0.08, 'triangle', 0.08),
-  reject:   () => playTone(180, 0.15, 'sawtooth', 0.10),
-  step:     () => playTone(440, 0.04, 'sine',     0.03),
+  place:    () => { playTone(660, 0.08, 'triangle', 0.08); vibe(10); },
+  reject:   () => { playTone(180, 0.15, 'sawtooth', 0.10); vibe([30, 20, 30]); },
+  step:     () => playTone(440, 0.04, 'sine', 0.03),
   reward:   () => {
     playTone(523, 0.10, 'sine', 0.08);
     setTimeout(() => playTone(784, 0.15, 'sine', 0.08), 60);
+    vibe([10, 30, 20]);
   },
-  cost:     () => playTone(220, 0.18, 'square',   0.06),
-  attack:   () => playTone(880, 0.10, 'square',   0.08),
+  cost:     () => { playTone(220, 0.18, 'square', 0.06); vibe(40); },
+  attack:   () => { playTone(880, 0.10, 'square', 0.08); vibe(15); },
   boom:     () => {
     playTone(150, 0.20, 'sawtooth', 0.15);
     setTimeout(() => playTone(80, 0.25, 'sawtooth', 0.12), 50);
+    vibe([60, 20, 80]);
   },
-  rotate:   () => playTone(550, 0.05, 'sine', 0.06),
+  rotate:   () => { playTone(550, 0.05, 'sine', 0.06); vibe(8); },
   gameover: () => {
     [330, 277, 220, 165].forEach((f, i) => {
       setTimeout(() => playTone(f, 0.3, 'sawtooth', 0.1), i * 150);
     });
+    vibe([100, 50, 100, 50, 200]);
   },
   shop:     () => {
     [659, 784, 988].forEach((f, i) => {
       setTimeout(() => playTone(f, 0.12, 'triangle', 0.07), i * 80);
     });
+    vibe([20, 40, 20]);
   },
   best:     () => {
     [784, 988, 1318].forEach((f, i) => {
       setTimeout(() => playTone(f, 0.15, 'sine', 0.1), i * 100);
     });
+    vibe([30, 20, 30, 20, 80]);
   },
   grandChain: () => {
     [523, 659, 784, 1047].forEach((f, i) => {
       setTimeout(() => playTone(f, 0.20, 'sine', 0.12), i * 60);
     });
     setTimeout(() => playTone(1568, 0.40, 'triangle', 0.15), 240);
+    vibe([50, 30, 50, 30, 100, 30, 200]);
   }
 };
